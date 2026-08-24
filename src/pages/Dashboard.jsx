@@ -512,7 +512,11 @@ export default function Dashboard({ session, onLogout }) {
 
   const userId = session.user.id
 
-  useEffect(() => { loadAll(); loadProfile() }, [])
+  useEffect(() => {
+    if (!userId) return
+    loadAll()
+    loadProfile()
+  }, [userId])
 
   async function loadProfile() {
     const { data } = await supabase.from('motora_profiles').select('*').eq('id', userId).maybeSingle()
