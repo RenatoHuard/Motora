@@ -4223,3 +4223,101 @@ button, input {
   transition: color 0.15s;
 }
 .direction-cancel:hover { color: var(--text); }
+
+/* ── Splash Screen ─────────────────────────────────────── */
+.splash {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.6s ease;
+}
+.splash--fade {
+  opacity: 0;
+  pointer-events: none;
+}
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+.splash-logo {
+  width: 180px;
+  height: auto;
+  border-radius: 20px;
+  animation: splash-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes splash-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.splash-dots {
+  display: flex;
+  gap: 8px;
+}
+.splash-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent, #FFC107);
+  animation: splash-pulse 1.2s ease-in-out infinite;
+}
+.splash-dots span:nth-child(2) { animation-delay: 0.2s; }
+.splash-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes splash-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+/* ── GPS Perspective View ──────────────────────────────── */
+.map-perspective-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.map-perspective-wrap--active {
+  perspective: 700px;
+}
+.map-perspective-wrap--active .leaflet-container {
+  transform: rotateX(42deg) scale(1.55);
+  transform-origin: center 70%;
+  transition: transform 0.4s ease;
+}
+.map-heading-wrap {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+.map-heading-wrap--active {
+  transition: transform 0.5s ease-out;
+}
+.nav-perspective-btn {
+  position: absolute;
+  bottom: 96px;
+  right: 12px;
+  z-index: 1000;
+  background: var(--surface, #1a1a1a);
+  border: 1.5px solid var(--border, #333);
+  border-radius: 10px;
+  color: var(--text, #fff);
+  font-size: 18px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  transition: background 0.15s, border-color 0.15s;
+}
+.nav-perspective-btn.active {
+  background: var(--accent, #FFC107);
+  border-color: var(--accent, #FFC107);
+  color: #000;
+}

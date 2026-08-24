@@ -131,10 +131,12 @@ export default function TripMapView({ line }) {
   const [liveRoute, setLiveRoute] = useState(null)  // {polyline, steps}
   const [liveStep,  setLiveStep]  = useState(0)
 
-  const [status,    setStatus]    = useState('idle')
-  const [following, setFollowing] = useState(true)
-  const [navActive, setNavActive] = useState(false)
-  const [showList,  setShowList]  = useState(false)
+  const [status,      setStatus]      = useState('idle')
+  const [following,   setFollowing]   = useState(true)
+  const [navActive,   setNavActive]   = useState(false)
+  const [showList,    setShowList]    = useState(false)
+  const [perspective, setPerspective] = useState(false)  // vista 3D estilo GPS
+  const [gpsHeading,  setGpsHeading]  = useState(null)   // direção de deslocamento (0–360°)
 
   // Refs for access inside async GPS callbacks (avoid stale closure)
   const waypointsRef   = useRef(null)
@@ -199,6 +201,7 @@ export default function TripMapView({ line }) {
       pos => {
         const here = [pos.coords.latitude, pos.coords.longitude]
         setGpsPos(here)
+        if (pos.coords.heading !== null) setGpsHeading(pos.coords.heading)
 
         const s = liveStepsRef.current
         if (s && navActiveRef.current) {
@@ -323,45 +326,67 @@ export default function TripMapView({ line }) {
       )}
 
       {/* ── Map ── */}
-      <MapContainer center={center} zoom={15} style={{ height: '100%', width: '100%' }} zoomControl={false}>
-        <TileLayer
-          attribution='Tiles &copy; Esri &mdash; Esri, Maxar, GeoEye, Earthstar Geographics'
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        />
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" opacity={0.3} attribution="" />
+      <div
+        className={`map-perspective-wrap${perspective ? ' map-perspective-wrap--active' : ''}`}
+        style={perspective && gpsHeading !== null ? { perspective: '700px' } : undefined}
+      >
+        <div
+          className={`map-heading-wrap${perspective && gpsHeading !== null ? ' map-heading-wrap--active' : ''}`}
+          style={perspective && gpsHeading !== null
+            ? { transform: `rotate(${-gpsHeading}deg)` }
+            : undefined}
+        >
+          <MapContainer center={center} zoom={15} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+            <TileLayer
+              attribution='Tiles &copy; Esri &mdash; Esri, Maxar, GeoEye, Earthstar Geographics'
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            />
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" opacity={0.3} attribution="" />
 
-        <PanToGps position={gpsPos} follow={following} />
+            <PanToGps position={gpsPos} follow={following} />
 
-        {/* Rota planejada — amarela, esmaecida quando nav ativa */}
-        {planRoute?.length >= 2 && (
-          <Polyline
-            positions={planRoute}
-            color="#FFC107"
-            weight={navActive ? 3 : 5}
-            opacity={navActive ? 0.25 : 0.92}
-          />
-        )}
+            {/* Rota planejada — amarela, esmaecida quando nav ativa */}
+            {planRoute?.length >= 2 && (
+              <Polyline
+                positions={planRoute}
+                color="#FFC107"
+                weight={navActive ? 3 : 5}
+                opacity={navActive ? 0.25 : 0.92}
+              />
+            )}
 
-        {/* Rota ao vivo do GPS — azul, seguindo vias reais */}
-        {navActive && activePolyline?.length >= 2 && (
-          <Polyline positions={activePolyline} color="#2196f3" weight={6} opacity={0.95} />
-        )}
+            {/* Rota ao vivo do GPS — azul, seguindo vias reais */}
+            {navActive && activePolyline?.length >= 2 && (
+              <Polyline positions={activePolyline} color="#2196f3" weight={6} opacity={0.95} />
+            )}
 
-        {/* Marcadores de parada */}
-        {(waypoints || []).map((coord, i) => {
-          const isO = i === 0, isD = i === (waypoints.length - 1)
-          return <Marker key={i} position={coord}
-            icon={colorDot(isO ? '#4caf50' : isD ? '#f44336' : '#FFC107', isO || isD ? 16 : 11)} />
-        })}
+            {/* Marcadores de parada */}
+            {(waypoints || []).map((coord, i) => {
+              const isO = i === 0, isD = i === (waypoints.length - 1)
+              return <Marker key={i} position={coord}
+                icon={colorDot(isO ? '#4caf50' : isD ? '#f44336' : '#FFC107', isO || isD ? 16 : 11)} />
+            })}
 
-        {/* Ponto do GPS */}
-        {gpsPos && <Marker position={gpsPos} icon={gpsDot()} />}
-      </MapContainer>
+            {/* Ponto do GPS */}
+            {gpsPos && <Marker position={gpsPos} icon={gpsDot()} />}
+          </MapContainer>
+        </div>
+      </div>
 
       {/* ── Controles ── */}
       <button className={`run-map-center-btn ${following ? 'active' : ''}`}
         onClick={() => setFollowing(f => !f)}
         title={following ? 'Desancorar posição' : 'Seguir GPS'}>⊙</button>
+
+      {navActive && (
+        <button
+          className={`nav-perspective-btn${perspective ? ' active' : ''}`}
+          onClick={() => setPerspective(p => !p)}
+          title={perspective ? 'Vista normal' : 'Vista GPS (3D)'}
+        >
+          {perspective ? '🗺' : '🚗'}
+        </button>
+      )}
 
       {navActive && (
         <button className="nav-stop-btn" onClick={stopNav}>⏹ Encerrar</button>

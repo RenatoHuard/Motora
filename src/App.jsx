@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import Auth from './pages/Auth'
 import Dashboard from './pages/Dashboard'
+import SplashScreen from './components/SplashScreen'
 
 export default function App() {
-  const [session, setSession] = useState(null)
+  const [session,         setSession]         = useState(null)
   const [checkingSession, setCheckingSession] = useState(true)
+  const [splashDone,      setSplashDone]      = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -17,13 +19,16 @@ export default function App() {
       setSession(newSession)
     })
 
-    return () => {
-      listener.subscription.unsubscribe()
-    }
+    return () => listener.subscription.unsubscribe()
   }, [])
 
-  if (checkingSession) {
-    return <div className="app-shell" />
+  // Show splash until both session check is done AND splash timer finishes
+  const showSplash = !splashDone || checkingSession
+
+  if (showSplash) {
+    return (
+      <SplashScreen onDone={() => setSplashDone(true)} />
+    )
   }
 
   return (
