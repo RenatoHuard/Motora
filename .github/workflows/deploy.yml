@@ -1,0 +1,52 @@
+name: Build e Deploy — Motora
+
+on:
+  push:
+    branches: [main]       # Dispara a cada push no branch main
+  workflow_dispatch:       # Permite disparar manualmente pelo GitHub
+
+jobs:
+  deploy:
+    name: Build & Upload Hostinger
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Faz checkout do código
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Configura Node 20
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3. Instala dependências limpas
+      - name: Instalar dependências
+        run: npm ci
+
+      # 4. Gera o build de produção
+      #    As variáveis VITE_* precisam estar nos Secrets do repositório
+      - name: Build de produção
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL:      ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      # 5. Faz upload da pasta dist/ para o FTP da Hostinger
+      #    FTP_USER e FTP_PASS ficam nos Secrets (nunca no código)
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:               ftp.renatohuard.com.br
+          username:             ${{ secrets.FTP_USER }}
+          password:             ${{ secrets.FTP_PASS }}
+          local-dir:            ./dist/
+          server-dir:           ./
+          dangerous-clean-slate: true   # Limpa arquivos antigos antes de subir
+          log-level:            minimal
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
