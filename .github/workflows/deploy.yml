@@ -2,8 +2,10 @@ name: Build e Deploy — Motora
 
 on:
   push:
-    branches: [main]       # Dispara a cada push no branch main
-  workflow_dispatch:       # Permite disparar manualmente pelo GitHub
+    branches: [main]
+    paths-ignore:
+      - 'MotoraApp/**'     # Alterações no app nativo não disparam deploy web
+  workflow_dispatch:
 
 jobs:
   deploy:

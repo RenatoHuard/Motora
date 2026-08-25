@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "Motora",
+    "slug": "appmotora",
+    "owner": "renatohuard",
+    "scheme": "motora",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.motora.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Motora precisa da sua localização para navegação GPS em tempo real.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Motora usa sua localização em segundo plano para continuar a navegação com a tela bloqueada."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0a84ff",
+        "foregroundImage": "./assets/icon.png"
+      },
+      "package": "com.motora.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "COLOQUE_SUA_CHAVE_GOOGLE_MAPS_AQUI"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0a84ff",
+          "image": "./assets/icon.png",
+          "imageWidth": 120
+        }
+      ],
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Motora usa sua localização para navegação GPS.",
+          "locationAlwaysPermission": "Motora usa sua localização em segundo plano durante a navegação.",
+          "locationWhenInUsePermission": "Motora precisa da localização para mostrar sua posição no mapa."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
