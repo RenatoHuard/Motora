@@ -133,6 +133,18 @@ export default function Auth({ onAuthSuccess }) {
       </form>
 
       {message && <div className={`message ${message.type}`}>{message.text}</div>}
+
+      <div className="auth-apk-row">
+        <span className="auth-apk-label">Prefere o app nativo?</span>
+        <a href="#" className="auth-apk-btn" onClick={e => e.preventDefault()} title="Em breve">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M17.523 15.341 14.55 12l2.973-3.341A1 1 0 0 0 16.78 7H7.22a1 1 0 0 0-.743 1.659L9.45 12l-2.973 3.341A1 1 0 0 0 7.22 17h9.56a1 1 0 0 0 .743-1.659z"/>
+            <path d="M5 2h14M5 22h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          Baixar APK
+          <span className="auth-apk-badge">em breve</span>
+        </a>
+      </div>
     </div>
   )
 }
