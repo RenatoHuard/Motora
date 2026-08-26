@@ -26,10 +26,25 @@ jobs:
 
       - name: Instalar dependências
         working-directory: MotoraApp
-        run: npm install --legacy-peer-deps
+        run: npm install
 
-      - name: Build APK (preview)
+      - name: Build APK no EAS (aguarda concluir)
         working-directory: MotoraApp
-        run: eas build --platform android --profile preview --non-interactive
+        run: eas build --platform android --profile preview --non-interactive --wait
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Baixar APK e publicar no GitHub Release
+        working-directory: MotoraApp
+        run: |
+          DOWNLOAD_URL=$(eas build:list --platform android --limit 1 --non-interactive --json | jq -r '.[0].artifacts.buildUrl')
+          echo "APK URL: $DOWNLOAD_URL"
+          curl -L "$DOWNLOAD_URL" -o motora-latest.apk
+          gh release delete latest-apk --yes 2>/dev/null || true
+          gh release create latest-apk motora-latest.apk \
+            --title "Motora App — Última versão" \
+            --notes "APK gerado automaticamente pelo EAS Build. Instale direto no Android." \
+            --latest
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
